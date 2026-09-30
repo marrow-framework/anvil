@@ -1,0 +1,28 @@
+{
+    "name": "marrow/anvil",
+    "description": "A local Docker development environment for Marrow applications — Sail's role, Marrow's own name (forge shapes the code, Anvil runs it).",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["marrow", "framework", "docker", "docker-compose", "development-environment"],
+    "homepage": "https://github.com/marrow-framework/anvil",
+    "support": {
+        "issues": "https://github.com/marrow-framework/anvil/issues",
+        "source": "https://github.com/marrow-framework/anvil"
+    },
+    "require": {
+        "php": ">=8.2",
+        "marrow/framework": "^2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Marrow\\Anvil\\": "src/"
+        }
+    },
+    "extra": {
+        "marrow": {
+            "modules": ["Marrow\\Anvil\\AnvilModule"]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
