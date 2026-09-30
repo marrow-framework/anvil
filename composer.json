@@ -9,6 +9,12 @@
         "issues": "https://github.com/marrow-framework/anvil/issues",
         "source": "https://github.com/marrow-framework/anvil"
     },
+    "authors": [
+        {
+            "name": "Aure Dulvresse",
+            "email": "marrow.framework@gmail.com"
+        }
+    ],
     "require": {
         "php": ">=8.2",
         "marrow/framework": "^2.2"
