@@ -29,6 +29,10 @@ manual registration step. The package declares its own module via
 `extra.marrow.modules` in its `composer.json`, which Marrow's package
 auto-discovery picks up automatically at boot.
 
+Run it with no `--services` on a real terminal and it asks which ones you want (space to select, enter to
+confirm) instead of silently defaulting to app-only — pass `--services=...` explicitly to skip the prompt
+(scripted/CI use already skips it automatically).
+
 ## What it creates
 
 ```bash

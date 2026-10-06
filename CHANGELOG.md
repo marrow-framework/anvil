@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **`anvil:install` is now interactive** — run it with no `--services` on a real terminal and it asks (space to
+  select, enter to confirm) instead of silently defaulting to "app only", which was easy to not realize you'd
+  gotten until `docker-compose.yml` already needed `--force` to add a service. Passing `--services=...`
+  explicitly still skips the prompt entirely (scripted/CI use), and it's skipped automatically whenever the
+  command isn't running on a real terminal at all. Also now asks before overwriting an existing file instead of
+  only accepting `--force`.
 - **`anvil.ps1`** — a PowerShell twin of the `anvil` bash wrapper (same subcommands: `up`, `down`, `forge`,
   `composer`, `npm`, `shell`, `test`, `queue`, `fresh`, anything else passed through to `docker compose`), for
   Windows without WSL or git-bash. `anvil:install` now publishes both.

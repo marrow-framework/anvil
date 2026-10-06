@@ -42,11 +42,8 @@ class AnvilInstallCommand extends Command
 
     protected function handle(): int
     {
-        $requested = array_filter(array_map('trim', explode(',', (string) $this->option('services'))));
-        $unknown = array_diff($requested, array_keys(self::SERVICES));
-
-        if (!empty($unknown)) {
-            $this->error('Unknown service(s): ' . implode(', ', $unknown) . '. Valid: ' . implode(', ', array_keys(self::SERVICES)));
+        $requested = $this->resolveServices();
+        if ($requested === null) {
             return self::FAILURE;
         }
 
@@ -74,6 +71,41 @@ class AnvilInstallCommand extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * `--services` wins when given (scripted/CI use, `--no-interaction`
+     * stays non-interactive automatically via Symfony Console). Otherwise,
+     * on a real terminal, asks — a blank `--services=` (or none at all) used
+     * to silently mean "app only", which is easy to not realize you got
+     * until docker-compose.yml already needs `--force` to fix.
+     *
+     * @return string[]|null Null means "already reported an error, bail".
+     */
+    private function resolveServices(): ?array
+    {
+        $option = $this->option('services');
+
+        if ($option !== null && trim((string) $option) !== '') {
+            $requested = array_filter(array_map('trim', explode(',', (string) $option)));
+            $unknown = array_diff($requested, array_keys(self::SERVICES));
+
+            if (!empty($unknown)) {
+                $this->error('Unknown service(s): ' . implode(', ', $unknown) . '. Valid: ' . implode(', ', array_keys(self::SERVICES)));
+                return null;
+            }
+
+            return array_values($requested);
+        }
+
+        if (!$this->input->isInteractive()) {
+            return [];
+        }
+
+        return $this->multiChoice(
+            'Which services do you want alongside the app container? (space to select, enter to confirm, none for app-only/SQLite)',
+            array_keys(self::SERVICES)
+        );
+    }
+
     /** @param string[] $services */
     private function printEnvHints(array $services): void
     {
@@ -98,8 +130,13 @@ class AnvilInstallCommand extends Command
     private function writeFile(string $path, string $contents, bool $force): void
     {
         if (is_file($path) && !$force) {
-            $this->warn("Skipped (already exists): {$path} — pass --force to overwrite.");
-            return;
+            $interactiveOverwrite = $this->input->isInteractive()
+                && $this->confirm("{$path} already exists — overwrite it?", false);
+
+            if (!$interactiveOverwrite) {
+                $this->warn("Skipped (already exists): {$path} — pass --force to overwrite.");
+                return;
+            }
         }
         @mkdir(dirname($path), 0755, true);
         file_put_contents($path, $contents);
