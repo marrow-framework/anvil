@@ -96,7 +96,7 @@ class AnvilInstallCommand extends Command
             return array_values($requested);
         }
 
-        if (!$this->input->isInteractive()) {
+        if (!$this->canPrompt()) {
             return [];
         }
 
@@ -130,7 +130,7 @@ class AnvilInstallCommand extends Command
     private function writeFile(string $path, string $contents, bool $force): void
     {
         if (is_file($path) && !$force) {
-            $interactiveOverwrite = $this->input->isInteractive()
+            $interactiveOverwrite = $this->canPrompt()
                 && $this->confirm("{$path} already exists — overwrite it?", false);
 
             if (!$interactiveOverwrite) {

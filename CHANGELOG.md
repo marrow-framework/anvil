@@ -7,6 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-06
+
+### Fixed
+
+- **`anvil:install`'s service prompt and overwrite-confirmation could hang indefinitely** on a stdin that
+  `Symfony\Console\Input::isInteractive()` incorrectly reported as safe to prompt — uses `marrow/framework`
+  3.0.1's new `Command::canPrompt()` guard (also checks `stream_isatty(STDIN)`) instead. Requires
+  `marrow/framework` ^3.0.1 accordingly.
+
 ## [1.1.0] - 2026-10-06
 
 ### Added

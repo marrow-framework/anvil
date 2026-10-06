@@ -17,7 +17,7 @@
     ],
     "require": {
         "php": ">=8.2",
-        "marrow/framework": "^2.2"
+        "marrow/framework": "^3.0.1"
     },
     "autoload": {
         "psr-4": {
