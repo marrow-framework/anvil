@@ -7,6 +7,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-06
+
+### Added
+
+- **`anvil.ps1`** — a PowerShell twin of the `anvil` bash wrapper (same subcommands: `up`, `down`, `forge`,
+  `composer`, `npm`, `shell`, `test`, `queue`, `fresh`, anything else passed through to `docker compose`), for
+  Windows without WSL or git-bash. `anvil:install` now publishes both.
+- **`./anvil queue`** — `docker compose exec app php forge queue:work`.
+- **`./anvil fresh`** — `docker compose exec app php forge migrate:fresh --seed`, a one-command dev-database
+  reset.
+
+### Fixed
+
+- **`app`'s `depends_on` only waited for a database *container* to start, not for the database inside it to
+  actually accept connections** — `./anvil up -d` immediately followed by `./anvil forge migrate` could race a
+  MySQL/MariaDB/PostgreSQL still initializing, especially against a cold volume. Every `mysql`/`mariadb`/
+  `pgsql`/`redis` service now ships a `healthcheck`, and `app` depends on `condition: service_healthy` rather
+  than a bare service-name list. Verified against the real `docker compose config` parser, not just read by
+  eye.
+
 ## [1.0.1] - 2026-10-05
 
 ### Changed
