@@ -29,6 +29,10 @@ manual registration step. The package declares its own module via
 `extra.marrow.modules` in its `composer.json`, which Marrow's package
 auto-discovery picks up automatically at boot.
 
+Run it with no `--services` on a real terminal and it asks which ones you want (space to select, enter to
+confirm) instead of silently defaulting to app-only — pass `--services=...` explicitly to skip the prompt
+(scripted/CI use already skips it automatically).
+
 ## What it creates
 
 ```bash
@@ -43,9 +47,15 @@ php forge anvil:install --force                                  # overwrite exi
 | `docker-compose.yml` | The `app` service always, plus any requested `--services` |
 | `docker/app/Dockerfile` | PHP 8.3-cli + the extensions Marrow needs (`pdo_mysql`, `pdo_pgsql`, `pdo_sqlite`, `zip`) + Composer |
 | `anvil` | An executable CLI wrapper (`chmod +x` already applied on non-Windows) |
+| `anvil.ps1` | The same CLI wrapper for Windows without WSL/git-bash — identical subcommands |
 
-All three are plain generated files, safe to edit by hand afterward —
+All four are plain generated files, safe to edit by hand afterward —
 re-running `anvil:install` won't touch them again unless you pass `--force`.
+
+Every database service (`mysql`/`mariadb`/`pgsql`) and `redis` ships with a `healthcheck`, and `app`'s
+`depends_on` waits on `condition: service_healthy` rather than just "container started" — without this,
+`./anvil up -d` followed immediately by `./anvil forge migrate` can race a database that's still initializing,
+especially on a cold volume (first run, or after `./anvil down -v`).
 
 ## The `app` service runs the same command as bare-metal dev
 
@@ -69,11 +79,15 @@ literal same command.
 ./anvil npm run build       # -> docker compose exec node npm run build (needs --services=node)
 ./anvil shell               # bash inside the app container
 ./anvil test                # -> docker compose exec app composer test
+./anvil queue                # -> docker compose exec app php forge queue:work
+./anvil fresh                # -> docker compose exec app php forge migrate:fresh --seed
 ./anvil ps / logs / build   # passed straight to `docker compose`
 ```
 
 Anything not in the list above falls through to `docker compose` directly,
 so `./anvil <anything>` always does *something* reasonable.
+
+On Windows without WSL/git-bash, use `.\anvil.ps1` instead — same subcommands, same behavior.
 
 ## Available services
 
